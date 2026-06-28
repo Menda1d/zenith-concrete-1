@@ -1,0 +1,651 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Zenith Concrete - Premium Calculator & Catalog</title>
+    <style>
+        :root {
+            --primary: #111827;
+            --accent: #2563eb;
+            --accent-hover: #1d4ed8;
+            --bg-light: #f9fafb;
+            --text-dark: #1f2937;
+            --text-muted: #4b5563;
+            --border: #e5e7eb;
+            --radius: 12px;
+            --font: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: var(--font); }
+        body { background: var(--bg-light); color: var(--text-dark); line-height: 1.5; padding-bottom: 60px; }
+
+        header {
+            background: #fff;
+            border-bottom: 1px solid var(--border);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .nav-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 1rem 2rem;
+        }
+
+        .logo { font-size: 1.4rem; font-weight: 800; color: var(--primary); letter-spacing: -0.5px; }
+        .logo span { color: var(--accent); }
+
+        .nav-menu { display: flex; gap: 2rem; list-style: none; }
+        .nav-menu a { text-decoration: none; color: var(--text-muted); font-weight: 500; transition: color 0.2s; }
+        .nav-menu a:hover { color: var(--accent); }
+
+        .hamburger { display: none; cursor: pointer; flex-direction: column; gap: 5px; }
+        .hamburger span { width: 25px; height: 3px; background: var(--text-dark); border-radius: 2px; }
+
+        main { max-width: 1200px; margin: 2.5rem auto; padding: 0 2rem; display: grid; grid-template-columns: 1.2fr 1fr; gap: 3rem; }
+
+        .catalog-panel { display: flex; flex-direction: column; gap: 2.5rem; }
+        .section-title { font-size: 1.5rem; font-weight: 700; color: var(--primary); margin-bottom: 1rem; letter-spacing: -0.3px; }
+
+        .slider-window { position: relative; width: 100%; overflow: hidden; border-radius: var(--radius); background: #eaeaea; box-shadow: 0 4px 12px rgba(0,0,0,0.03); }
+        .slider-track { display: flex; transition: transform 0.4s cubic-bezier(0.25, 1, 0.5, 1); width: 100%; }
+        .slide { min-width: 100%; position: relative; aspect-ratio: 16 / 10; }
+        .slide img { width: 100%; height: 100%; object-fit: cover; display: block; cursor: zoom-in; }
+        
+        .slide-meta {
+            position: absolute; bottom: 0; left: 0; right: 0;
+            background: linear-gradient(transparent, rgba(0,0,0,0.85));
+            color: #fff; padding: 2rem 1.5rem 1.5rem;
+        }
+        .slide-meta h3 { font-size: 1.25rem; font-weight: 600; margin-bottom: 0.25rem; }
+        .slide-meta p { font-size: 0.9rem; opacity: 0.85; }
+
+        .slider-arrow {
+            position: absolute; top: 50%; transform: translateY(-50%);
+            background: rgba(255,255,255,0.9); border: none; width: 40px; height: 40px;
+            border-radius: 50%; display: flex; align-items: center; justify-content: center;
+            cursor: pointer; box-shadow: 0 2px 8px rgba(0,0,0,0.1); z-index: 10; transition: all 0.2s;
+        }
+        .slider-arrow:hover { background: #fff; transform: translateY(-50%) scale(1.05); }
+        .arrow-prev { left: 12px; }
+        .arrow-next { right: 12px; }
+
+        .calculator-card { background: #fff; border: 1px solid var(--border); border-radius: var(--radius); padding: 2.5rem; box-shadow: 0 10px 30px rgba(0,0,0,0.02); height: fit-content; }
+        .form-group { margin-bottom: 1.5rem; }
+        .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1.5rem; }
+        label { display: block; font-size: 0.85rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; color: var(--text-muted); margin-bottom: 0.5rem; }
+        
+        select, input[type="text"], input[type="number"] {
+            width: 100%; padding: 0.85rem 1rem; border: 1px solid var(--border); border-radius: 8px;
+            font-size: 1rem; color: var(--text-dark); background-color: var(--bg-light); transition: all 0.2s;
+        }
+        select:focus, input:focus { outline: none; border-color: var(--accent); background-color: #fff; box-shadow: 0 0 0 4px rgba(37,99,235,0.1); }
+
+        .radio-tile-group { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1.5rem; }
+        .radio-tile {
+            position: relative; border: 1px solid var(--border); padding: 1rem; border-radius: 8px;
+            text-align: center; cursor: pointer; background: var(--bg-light); transition: all 0.2s;
+        }
+        .radio-tile input { position: absolute; top: 0; left: 0; width: 100%; height: 100%; opacity: 0; cursor: pointer; }
+        .radio-tile:has(input:checked) { border-color: var(--accent); background: rgba(37,99,235,0.04); color: var(--accent); font-weight: 600; }
+
+        .live-panel {
+            background: #f0fdf4; border: 1px dashed #bbf7d0; border-radius: 8px; padding: 1.25rem;
+            display: none; justify-content: space-between; align-items: center; margin-bottom: 1.5rem;
+        }
+        .live-stat h5 { font-size: 0.8rem; color: #166534; text-transform: uppercase; letter-spacing: 0.5px; }
+        .live-stat p { font-size: 1.35rem; font-weight: 700; color: #14532d; }
+
+        .slider-input-box { display: flex; align-items: center; gap: 1rem; background: var(--bg-light); padding: 0.5rem 1rem; border-radius: 8px; border: 1px solid var(--border); }
+        .slider-input-box input[type="range"] { flex: 1; accent-color: var(--accent); }
+        .slider-input-box input[type="number"] { width: 70px; text-align: center; padding: 0.5rem; background: #fff; }
+
+        .action-grid { display: grid; grid-template-columns: 2fr 1fr; gap: 1rem; margin-top: 2rem; }
+        .btn {
+            padding: 1rem 1.5rem; border-radius: 8px; font-size: 1rem; font-weight: 600;
+            border: none; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 0.5rem; transition: all 0.2s;
+        }
+        .btn-primary { background: #25d366; color: #fff; }
+        .btn-primary:hover { background: #20ba56; transform: translateY(-1px); }
+        .btn-secondary { background: var(--primary); color: #fff; }
+        .btn-secondary:hover { background: #111; }
+
+        /* Global Lightbox Layout */
+        .lightbox {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(17, 24, 39, 0.95); z-index: 2000; display: none;
+            align-items: center; justify-content: center;
+        }
+        .lightbox-content { position: relative; max-width: 90%; max-height: 85%; display: flex; align-items: center; justify-content: center; }
+        .lightbox-content img { max-width: 100%; max-height: 85vh; object-fit: contain; border-radius: 4px; box-shadow: 0 25px 50px -12px rgba(0,0,0,0.5); }
+        
+        .lightbox-close {
+            position: absolute; top: -50px; right: 0; background: none; border: none;
+            color: #fff; font-size: 2.5rem; cursor: pointer; opacity: 0.7; transition: opacity 0.2s;
+        }
+        .lightbox-close:hover { opacity: 1; }
+        
+        .lightbox-nav {
+            position: absolute; top: 50%; transform: translateY(-50%);
+            background: rgba(255,255,255,0.1); border: none; width: 50px; height: 50px;
+            border-radius: 50%; color: #fff; font-size: 1.5rem; display: flex;
+            align-items: center; justify-content: center; cursor: pointer; transition: background 0.2s;
+        }
+        .lightbox-nav:hover { background: rgba(255,255,255,0.25); }
+        .lightbox-prev { left: -75px; }
+        .lightbox-next { right: -75px; }
+
+        @media(max-width: 968px) {
+            main { grid-template-columns: 1fr; gap: 2.5rem; }
+            .lightbox-prev { left: 10px; }
+            .lightbox-next { right: 10px; }
+            .lightbox-close { right: 10px; top: -60px; }
+        }
+        @media(max-width: 768px) {
+            .nav-menu { display: none; position: absolute; top: 100%; left: 0; right: 0; background: #fff; border-bottom: 1px solid var(--border); padding: 1.5rem; flex-direction: column; gap: 1rem; }
+            .nav-menu.active { display: flex; }
+            .hamburger { display: flex; }
+        }
+    </style>
+</head>
+<body>
+
+    <header>
+        <div class="nav-container">
+            <div class="logo">Zenith<span>Concrete</span></div>
+            <div class="hamburger" id="mobile-menu"><span></span><span></span><span></span></div>
+            <ul class="nav-menu" id="nav-menu">
+                <li><a href="#products">Our Products</a></li>
+                <li><a href="#projects">Project Gallery</a></li>
+                <li><a href="#estimator">Request Estimate</a></li>
+            </ul>
+        </div>
+    </header>
+
+    <main>
+        <!-- LEFT COLUMN: PRODUCT & PROJECT PORTFOLIO SLIDERS -->
+        <div class="catalog-panel">
+            
+            <!-- Products Slider Container -->
+            <section id="products">
+                <h2 class="section-title">Production Lineup</h2>
+                <div class="slider-window">
+                    <button class="slider-arrow arrow-prev" id="prod-prev">&#10094;</button>
+                    <button class="slider-arrow arrow-next" id="prod-next">&#10095;</button>
+                    <div class="slider-track" id="product-slider">
+                        <div class="slide">
+                            <!-- FIXED DIRECT IMAGE LINK -->
+                            <img src="img1.jpg" class="slide-img" alt="Hollow Blocks">
+                            <div class="slide-meta">
+                                <h3>Load-Bearing Hollow Blocks</h3>
+                                <p>Available in 9-inch and 6-inch architectural variants.</p>
+                            </div>
+                        </div>
+                        <div class="slide">
+                            <!-- FIXED DIRECT IMAGE LINK -->
+                            <img src="img2.jpg" class="slide-img" alt="Vibrated Solid Blocks">
+                            <div class="slide-meta">
+                                <h3>Vibrated Solid Blocks</h3>
+                                <p>Heavy duty structural blockwork for foundational deployment.</p>
+                            </div>
+                        </div>
+                        <div class="slide">
+                            <!-- FIXED DIRECT IMAGE LINK -->
+                            <img src="img3.jpg" class="slide-img" alt="Interlocking Pavers">
+                            <div class="slide-meta">
+                                <h3>Interlocking Paving Stones</h3>
+                                <p>High strength color-infused external paving solutions.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Projects Slider Container -->
+            <section id="projects">
+                <h2 class="section-title">Completed Projects</h2>
+                <div class="slider-window">
+                    <button class="slider-arrow arrow-prev" id="proj-prev">&#10094;</button>
+                    <button class="slider-arrow arrow-next" id="proj-next">&#10095;</button>
+                    <div class="slider-track" id="project-slider">
+                        <div class="slide">
+                            <!-- FIXED DIRECT IMAGE LINK -->
+                            <img src="img4.jpg" class="slide-img" alt="Commercial Precinct Layout">
+                            <div class="slide-meta">
+                                <h3>Commercial Precinct Layout</h3>
+                                <p>Over 5,000 sqm of interlocking masonry stabilization.</p>
+                            </div>
+                        </div>
+                        <div class="slide">
+                            <!-- FIXED DIRECT IMAGE LINK -->
+                            <img src="img5.jpg" class="slide-img" alt="Industrial Retaining Firewall">
+                            <div class="slide-meta">
+                                <h3>Industrial Retaining Firewall</h3>
+                                <p>Built entirely using heavy-gauge load-bearing solid units.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+        </div>
+
+        <!-- RIGHT COLUMN: INTUITIVE ESTIMATION WORKFLOW ENGINE -->
+        <div class="calculator-card" id="estimator">
+            <h2 class="section-title" style="margin-bottom: 2rem;">Material Calculator Engine</h2>
+            
+            <form id="estimateForm">
+                <div class="form-group">
+                    <label for="product-type">Select Material Requirement</label>
+                    <select id="product-type" required>
+                        <option value="" disabled selected>-- Choose Material --</option>
+                        <option value="Concrete Blocks">Concrete Blocks (Hollow & Solid)</option>
+                        <option value="Interlocking Paving Stones">Interlocking Paving Stones</option>
+                        <option value="Concrete Kerbstones">Concrete Kerbstones</option>
+                        <option value="Precast Drainage Elements">Precast Drainage Elements</option>
+                    </select>
+                </div>
+
+                <!-- BLOCKS EXCLUSIVE LOGIC CONTROLS -->
+                <div id="blocks-options-group" style="display: none;">
+                    <div class="form-group">
+                        <label for="block-type">Block Size Metric</label>
+                        <select id="block-type">
+                            <option value="9-Inch Hollow Block (450mm x 225mm x 225mm)">9-Inch Hollow (450 x 225 x 225mm)</option>
+                            <option value="6-Inch Hollow Block (450mm x 150mm x 225mm)">6-Inch Hollow (450 x 150 x 225mm)</option>
+                            <option value="9-Inch Solid Block (450mm x 225mm x 225mm)">9-Inch Solid (450 x 225 x 225mm)</option>
+                            <option value="6-Inch Solid Block (450mm x 150mm x 225mm)">6-Inch Solid (450 x 150 x 225mm)</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Calculation Profile Strategy</label>
+                        <div class="radio-tile-group">
+                            <div class="radio-tile">
+                                <input type="radio" name="block-input-method" value="direct" checked>
+                                <span>Direct Area / Counts</span>
+                            </div>
+                            <div class="radio-tile">
+                                <input type="radio" name="block-input-method" value="fence">
+                                <span>Wall/Fence Run</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Fence Parameters Group -->
+                <div class="form-row" id="block-fence-fields" style="display: none;">
+                    <div class="form-group">
+                        <label for="fence-length">Total Run Length (m)</label>
+                        <input type="number" id="fence-length" step="any" placeholder="e.g. 120">
+                    </div>
+                    <div class="form-group">
+                        <label for="fence-height">Design Wall Height (m)</label>
+                        <input type="number" id="fence-height" step="any" placeholder="e.g. 3.2">
+                    </div>
+                </div>
+
+                <!-- Unified Block Outputs / Inputs Dynamic Grid -->
+                <div class="form-row" id="blocks-quantity-grid" style="display: none;">
+                    <div class="form-group">
+                        <label for="block-sqm">Surface Area (m²)</label>
+                        <input type="number" id="block-sqm" step="any" placeholder="Calculated or manual input">
+                    </div>
+                    <div class="form-group">
+                        <label for="block-count">Calculated Block Count</label>
+                        <input type="number" id="block-count" placeholder="Pieces required">
+                    </div>
+                </div>
+
+                <!-- PAVING EXCLUSIVE CONTROLS -->
+                <div class="form-group" id="paving-options-group" style="display: none;">
+                    <label for="paving-type">Paving Profile Structure</label>
+                    <select id="paving-type">
+                        <option value="60mm Double-T Interlocking Paver">60mm Double-T (Light/Medium Traffic)</option>
+                        <option value="80mm Double-T Interlocking Paver">80mm Double-T (Heavy-Duty Industrial)</option>
+                        <option value="60mm Rectangular Brick Paver">60mm Rectangular Brick</option>
+                    </select>
+                </div>
+
+                <!-- KERB EXCLUSIVE CONTROLS -->
+                <div class="form-group" id="kerb-options-group" style="display: none;">
+                    <label for="kerb-type">Kerb Profile Structure</label>
+                    <select id="kerb-type">
+                        <option value="Standard Highway Kerb (NBS Profile)">Standard Highway Kerb</option>
+                        <option value="Lightweight Garden Edging Median">Lightweight Garden Edging Median</option>
+                    </select>
+                </div>
+
+                <!-- PRECAST DIMENSIONAL CONTROLS -->
+                <div id="precast-options-group" style="display: none;">
+                    <div class="form-row">
+                        <div class="form-group"><label for="precast-l">Length (m)</label><input type="number" id="precast-l" step="any" placeholder="1.0"></div>
+                        <div class="form-group"><label for="precast-w">Width (m)</label><input type="number" id="precast-w" step="any" placeholder="0.5"></div>
+                        <div class="form-group"><label for="precast-b">Breadth (m)</label><input type="number" id="precast-b" step="any" placeholder="0.5"></div>
+                    </div>
+                    <div class="form-group">
+                        <label>Total Structural Units Required</label>
+                        <div class="slider-input-box">
+                            <input type="range" id="precast-units-slider" min="1" max="500" value="1">
+                            <input type="number" id="precast-units-num" min="1" value="1">
+                        </div>
+                    </div>
+                </div>
+
+                <!-- GENERAL QUANTITY INPUT (Hidden for Blocks) -->
+                <div class="form-group" id="global-quantity-group">
+                    <label id="qty-label" for="quantity">Estimated Volume / Square Meters (or Pcs)</label>
+                    <input type="text" id="quantity" placeholder="e.g. 450 sqm or 2500 pcs" required>
+                </div>
+
+                <!-- Premium Live Analytical Feedback Panel -->
+                <div class="live-panel" id="live-calc-panel">
+                    <div class="live-stat">
+                        <h5 id="stat-label-left">Metric A</h5>
+                        <p id="stat-val-left">0.00</p>
+                    </div>
+                    <div class="live-stat" style="text-align: right;">
+                        <h5 id="stat-label-right">Metric B</h5>
+                        <p id="stat-val-right">0.00</p>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="location">Target Logistics Delivery Location</label>
+                    <input type="text" id="location" placeholder="Site neighborhood or construction zone address" required>
+                </div>
+
+                <div class="action-grid">
+                    <button type="submit" class="btn btn-primary">
+                        <svg style="width:20px;height:20px" viewBox="0 0 24 24"><path fill="currentColor" d="M12.04 2C6.5 2 2 6.5 2 12C2 13.56 2.33 15.06 2.96 16.42L1 23L7.75 21.3C9.07 22 10.5 22.4 12.04 22.4C17.56 22.4 22.06 17.9 22.06 12.3C22.06 6.75 17.56 2.22 12.04 2.22M12.04 3.85C16.7 3.85 20.47 7.63 20.47 12.3C20.47 16.96 16.7 20.74 12.04 20.74C10.74 20.74 9.5 20.45 8.4 19.9L8 19.66L4.03 20.67L5.05 16.85L4.8 16.45C4.2 15.4 3.85 14.2 3.85 12.3C3.85 7.63 7.63 3.85 12.04 3.85M9.1 7.3C8.9 7.3 8.57 7.37 8.3 7.67C8 8 7.23 8.75 7.23 10.3C7.23 11.84 8.35 13.34 8.5 13.54C8.65 13.75 10.7 17.1 13.97 18.35C17.24 19.6 17.24 19.2 17.94 19.1C18.64 19 20.14 18.17 20.45 17.3C20.76 16.42 20.76 15.67 20.66 15.5C20.56 15.36 20.3 15.27 19.9 metal 15.1C19.5 14.9 17.5 13.9 17.15 13.8C16.8 13.67 16.54 13.6 16.3 13.95C16.04 14.3 15.3 15.17 15.07 15.4C14.84 15.64 14.6 15.67 14.22 15.47C13.84 15.27 12.6 14.87 11.14 13.57C10 12.55 9.25 11.3 9.05 10.95C8.85 10.6 9 10.4 9.2 10.2C9.4 10 9.6 9.77 9.8 9.57C10 9.37 10.07 9.2 10.2 8.94C10.34 8.68 10.27 8.45 10.17 8.25C10.07 8.05 9.3 6.13 9.1 7.3Z"/></svg>
+                        WhatsApp Estimate
+                    </button>
+                    <button type="button" class="btn btn-secondary" id="copy-quote-btn">📋 Copy</button>
+                </div>
+            </form>
+        </div>
+    </main>
+
+    <!-- GLOBAL DYNAMIC LIGHTBOX STRUCTURE -->
+    <div class="lightbox" id="global-lightbox">
+        <div class="lightbox-content">
+            <button class="lightbox-close" id="close-lightbox">&times;</button>
+            <button class="lightbox-nav lightbox-prev" id="lightbox-prev">&#10094;</button>
+            <img src="" id="lightbox-target-img" alt="Enlarged Showcase View">
+            <button class="lightbox-nav lightbox-next" id="lightbox-next">&#10095;</button>
+        </div>
+    </div>
+
+    <script>
+        // --- MOBILE MENU TOGGLE ---
+        const mobileMenu = document.getElementById('mobile-menu');
+        const navMenu = document.getElementById('nav-menu');
+        mobileMenu.addEventListener('click', () => navMenu.classList.toggle('active'));
+
+        // --- SLIDER TRACKING ---
+        let currentProductIndex = 0;
+        let currentProjectIndex = 0;
+        const productSlider = document.getElementById('product-slider');
+        const projectSlider = document.getElementById('project-slider');
+        const totalProductSlides = productSlider.children.length;
+        const totalProjectSlides = projectSlider.children.length;
+
+        document.getElementById('prod-next').addEventListener('click', () => {
+            currentProductIndex = (currentProductIndex + 1) % totalProductSlides;
+            updateSliderPosition(productSlider, currentProductIndex);
+        });
+        document.getElementById('prod-prev').addEventListener('click', () => {
+            currentProductIndex = (currentProductIndex - 1 + totalProductSlides) % totalProductSlides;
+            updateSliderPosition(productSlider, currentProductIndex);
+        });
+        document.getElementById('proj-next').addEventListener('click', () => {
+            currentProjectIndex = (currentProjectIndex + 1) % totalProjectSlides;
+            updateSliderPosition(projectSlider, currentProjectIndex);
+        });
+        document.getElementById('proj-prev').addEventListener('click', () => {
+            currentProjectIndex = (currentProjectIndex - 1 + totalProjectSlides) % totalProjectSlides;
+            updateSliderPosition(projectSlider, currentProjectIndex);
+        });
+
+        function updateSliderPosition(slider, index) {
+            slider.style.transform = `translateX(-${index * 100}%)`;
+        }
+
+        // --- FORM LOGIC ---
+        const mainProductSelect = document.getElementById('product-type');
+        const quantityInput = document.getElementById('quantity');
+        const qtyLabel = document.getElementById('qty-label');
+        const globalQtyGroup = document.getElementById('global-quantity-group');
+
+        const blocksGroup = document.getElementById('blocks-options-group');
+        const blockSelect = document.getElementById('block-type');
+        const blocksQtyGrid = document.getElementById('blocks-quantity-grid');
+        const blockSqmInput = document.getElementById('block-sqm');
+        const blockCountInput = document.getElementById('block-count');
+        
+        const blockDirectFields = document.getElementById('block-direct-fields');
+        const blockFenceFields = document.getElementById('block-fence-fields');
+        const fenceLengthInput = document.getElementById('fence-length');
+        const fenceHeightInput = document.getElementById('fence-height');
+        
+        const pavingGroup = document.getElementById('paving-options-group');
+        const pavingSelect = document.getElementById('paving-type');
+        const kerbGroup = document.getElementById('kerb-options-group');
+        const kerbSelect = document.getElementById('kerb-type');
+        
+        const precastGroup = document.getElementById('precast-options-group');
+        const precastL = document.getElementById('precast-l');
+        const precastW = document.getElementById('precast-w');
+        const precastB = document.getElementById('precast-b');
+        const precastUnitsSlider = document.getElementById('precast-units-slider');
+        const precastUnitsNum = document.getElementById('precast-units-num');
+
+        const liveCalcPanel = document.getElementById('live-calc-panel');
+        const statLabelLeft = document.getElementById('stat-label-left');
+        const statValLeft = document.getElementById('stat-val-left');
+        const statLabelRight = document.getElementById('stat-label-right');
+        const statValRight = document.getElementById('stat-val-right');
+
+        const BLOCK_FACE_AREA = 0.10125; 
+
+        function syncLivePanel(leftLabel, leftVal, rightLabel, rightVal) {
+            liveCalcPanel.style.display = 'flex';
+            statLabelLeft.innerText = leftLabel;
+            statValLeft.innerText = leftVal;
+            statLabelRight.innerText = rightLabel;
+            statValRight.innerText = rightVal;
+        }
+
+        const radioMethods = document.querySelectorAll('input[name="block-input-method"]');
+        radioMethods.forEach(radio => {
+            radio.addEventListener('change', function() {
+                blockSqmInput.value = ''; blockCountInput.value = '';
+                fenceLengthInput.value = ''; fenceHeightInput.value = '';
+                liveCalcPanel.style.display = 'none';
+
+                if (this.value === 'fence') {
+                    blockDirectFields.style.display = 'grid';
+                    blockFenceFields.style.display = 'grid';
+                    blockSqmInput.readOnly = true; blockCountInput.readOnly = true;
+                    fenceLengthInput.setAttribute('required', 'required');
+                    fenceHeightInput.setAttribute('required', 'required');
+                } else {
+                    blockDirectFields.style.display = 'grid';
+                    blockFenceFields.style.display = 'none';
+                    blockSqmInput.readOnly = false; blockCountInput.readOnly = false;
+                    fenceLengthInput.removeAttribute('required');
+                    fenceHeightInput.removeAttribute('required');
+                }
+            });
+        });
+
+        blockSqmInput.addEventListener('input', function() {
+            const sqm = parseFloat(this.value);
+            if (!isNaN(sqm) && sqm > 0) {
+                const blocks = Math.ceil(sqm / BLOCK_FACE_AREA);
+                blockCountInput.value = blocks;
+                syncLivePanel("Total Area", `${sqm} m²`, "Blocks Needed", `${blocks} Pcs`);
+            } else { blockCountInput.value = ''; liveCalcPanel.style.display = 'none'; }
+        });
+
+        blockCountInput.addEventListener('input', function() {
+            const count = parseFloat(this.value);
+            if (!isNaN(count) && count > 0) {
+                const area = (count * BLOCK_FACE_AREA).toFixed(2);
+                blockSqmInput.value = area;
+                syncLivePanel("Total Area", `${area} m²`, "Blocks Needed", `${count} Pcs`);
+            } else { blockSqmInput.value = ''; liveCalcPanel.style.display = 'none'; }
+        });
+
+        function calculateFenceMetrics() {
+            const length = parseFloat(fenceLengthInput.value);
+            const height = parseFloat(fenceHeightInput.value);
+            if (!isNaN(length) && length > 0 && !isNaN(height) && height > 0) {
+                const computedArea = length * height;
+                const blocks = Math.ceil(computedArea / BLOCK_FACE_AREA);
+                blockSqmInput.value = computedArea.toFixed(2);
+                blockCountInput.value = blocks;
+                syncLivePanel("Wall Area", `${computedArea.toFixed(2)} m²`, "Blocks Needed", `${blocks} Pcs`);
+            } else { blockSqmInput.value = ''; blockCountInput.value = ''; liveCalcPanel.style.display = 'none'; }
+        }
+        fenceLengthInput.addEventListener('input', calculateFenceMetrics);
+        fenceHeightInput.addEventListener('input', calculateFenceMetrics);
+
+        precastUnitsSlider.addEventListener('input', function() { precastUnitsNum.value = this.value; calculatePrecastVolume(); });
+        precastUnitsNum.addEventListener('input', function() { if (this.value < 1) this.value = 1; precastUnitsSlider.value = this.value; calculatePrecastVolume(); });
+        [precastL, precastW, precastB].forEach(input => input.addEventListener('input', calculatePrecastVolume));
+
+        function calculatePrecastVolume() {
+            if (mainProductSelect.value === 'Precast Drainage Elements') {
+                const l = parseFloat(precastL.value) || 0;
+                const w = parseFloat(precastW.value) || 0;
+                const b = parseFloat(precastB.value) || 0;
+                const units = parseInt(precastUnitsNum.value) || 1;
+                const totalVolume = l * w * b * units;
+                quantityInput.value = totalVolume > 0 ? `${totalVolume.toFixed(3)} m³` : '';
+                if(totalVolume > 0) syncLivePanel("Unit Volume", `${(l*w*b).toFixed(3)} m³`, "Total Batch", `${totalVolume.toFixed(3)} m³`);
+            }
+        }
+
+        mainProductSelect.addEventListener('change', function() {
+            [blocksGroup, blocksQtyGrid, pavingGroup, kerbGroup, precastGroup, liveCalcPanel].forEach(g => g.style.display = 'none');
+            globalQtyGroup.style.display = 'block'; quantityInput.readOnly = false;
+            qtyLabel.innerText = "Estimated Volume / Square Meters (or Pcs)";
+
+            if (this.value === 'Concrete Blocks') {
+                blocksGroup.style.display = 'block'; blocksQtyGrid.style.display = 'block';
+                globalQtyGroup.style.display = 'none';
+            } else if (this.value === 'Precast Drainage Elements') {
+                precastGroup.style.display = 'block'; quantityInput.readOnly = true;
+                qtyLabel.innerText = "Calculated Concrete Volume (m³)"; calculatePrecastVolume();
+            } else if (this.value === 'Interlocking Paving Stones' || this.value === 'Concrete Kerbstones') {
+                const activeSpecGroup = this.value === 'Interlocking Paving Stones' ? pavingGroup : kerbGroup;
+                activeSpecGroup.style.display = 'block';
+            }
+        });
+
+        function gatherFormMessage() {
+            const product = mainProductSelect.value;
+            const location = document.getElementById('location').value;
+            let finalQty = quantityInput.value;
+            let structuralSpecification = "Standard Production Metric";
+            let extraPrecastDetails = "";
+
+            if (product === 'Concrete Blocks') {
+                structuralSpecification = blockSelect.value;
+                const activeMethod = document.querySelector('input[name="block-input-method"]:checked').value;
+                if (activeMethod === 'fence') {
+                    extraPrecastDetails = `\n• *Wall Profile:* ${fenceLengthInput.value}m (L) x ${fenceHeightInput.value}m (H)`;
+                }
+                finalQty = `${blockCountInput.value} Blocks (~${blockSqmInput.value} m² Area)`;
+            } else if (product === 'Interlocking Paving Stones') {
+                structuralSpecification = pavingSelect.value;
+            } else if (product === 'Concrete Kerbstones') {
+                structuralSpecification = kerbSelect.value;
+            } else if (product === 'Precast Drainage Elements') {
+                structuralSpecification = `Custom LWB Precast Elements`;
+                extraPrecastDetails = `\n• *Specs:* ${precastL.value}m x ${precastW.value}m x ${precastB.value}m\n• *Units:* ${precastUnitsNum.value} Pcs`;
+            }
+
+            return `Hello Zenith Concrete, I would like to request an estimate:\n\n` +
+                   `• *Material Group:* ${product}\n` +
+                   `• *Size Specification:* ${structuralSpecification}${extraPrecastDetails}\n` +
+                   `• *Quantity / Volume:* ${finalQty}\n` +
+                   `• *Delivery Location:* ${location}`;
+        }
+
+        document.getElementById('estimateForm').addEventListener('submit', (e) => {
+            e.preventDefault();
+            window.open(`https://wa.me/2347062022875?text=${encodeURIComponent(gatherFormMessage())}`, '_blank');
+        });
+
+        document.getElementById('copy-quote-btn').addEventListener('click', () => {
+            if(!mainProductSelect.value || !document.getElementById('location').value) {
+                alert("Please select a material requirement and layout delivery location first.");
+                return;
+            }
+            navigator.clipboard.writeText(gatherFormMessage()).then(() => {
+                const btn = document.getElementById('copy-quote-btn');
+                btn.innerText = "Copied!";
+                setTimeout(() => btn.innerText = "📋 Copy", 2000);
+            });
+        });
+
+        // --- GLOBAL LIGHTBOX CONTROL ---
+        const lightbox = document.getElementById('global-lightbox');
+        const lightboxImg = document.getElementById('lightbox-target-img');
+        const productImages = Array.from(document.querySelectorAll('#products .slide-img'));
+        const projectImages = Array.from(document.querySelectorAll('#projects .slide-img'));
+        let currentActivePool = []; let activeImageIndex = 0;
+
+        productImages.forEach((img, idx) => img.addEventListener('click', () => { currentActivePool = productImages; activeImageIndex = idx; openLightboxAtActiveIndex(); }));
+        projectImages.forEach((img, idx) => img.addEventListener('click', () => { currentActivePool = projectImages; activeImageIndex = idx; openLightboxAtActiveIndex(); }));
+
+        function openLightboxAtActiveIndex() {
+            if (!currentActivePool.length) return;
+            lightboxImg.src = currentActivePool[activeImageIndex].src;
+            lightbox.style.display = 'flex';
+        }
+
+        function lightboxNext() {
+            if (!currentActivePool.length) return;
+            activeImageIndex = (activeImageIndex + 1) % currentActivePool.length; openLightboxAtActiveIndex();
+            if (currentActivePool === productImages) { currentProductIndex = activeImageIndex; updateSliderPosition(productSlider, currentProductIndex); }
+            else { currentProjectIndex = activeImageIndex; updateSliderPosition(projectSlider, currentProjectIndex); }
+        }
+
+        function lightboxPrev() {
+            if (!currentActivePool.length) return;
+            activeImageIndex = (activeImageIndex - 1 + currentActivePool.length) % currentActivePool.length; openLightboxAtActiveIndex();
+            if (currentActivePool === productImages) { currentProductIndex = activeImageIndex; updateSliderPosition(productSlider, currentProductIndex); }
+            else { currentProjectIndex = activeImageIndex; updateSliderPosition(projectSlider, currentProjectIndex); }
+        }
+
+        document.getElementById('lightbox-next').addEventListener('click', (e) => { e.stopPropagation(); lightboxNext(); });
+        document.getElementById('lightbox-prev').addEventListener('click', (e) => { e.stopPropagation(); lightboxPrev(); });
+        document.getElementById('close-lightbox').addEventListener('click', () => lightbox.style.display = 'none');
+        lightbox.addEventListener('click', (e) => { if(e.target === lightbox) lightbox.style.display = 'none'; });
+
+        // Keypad window listeners with display validation override
+        window.addEventListener('keydown', (e) => {
+            const isLightboxOpen = lightbox.style.display && lightbox.style.display !== 'none';
+            if (isLightboxOpen) {
+                if (e.key === 'Escape') {
+                    lightbox.style.display = 'none';
+                } else if (e.key === 'ArrowRight') {
+                    e.preventDefault(); 
+                    lightboxNext();
+                } else if (e.key === 'ArrowLeft') {
+                    e.preventDefault(); 
+                    lightboxPrev();
+                }
+            }
+        });
+    </script>
+</body>
+</html>
